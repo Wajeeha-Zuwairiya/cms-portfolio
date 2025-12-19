@@ -1,4 +1,4 @@
-// src/pages/Home.jsx
+// src/pages/user/Home.jsx
 import React, { useEffect, useState, useCallback } from "react";
 import * as FaIcons from "react-icons/fa";
 import { motion } from "framer-motion";
@@ -162,25 +162,26 @@ export default function Home() {
   const name = about?.name || "Your Name";
   const title = about?.title || "Developer";
   const bio = about?.bio || "";
+  const BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";  
 
   const profileImageURL = about?.profileImage
-    ? `http://localhost:5000/uploads/${about.profileImage}`
+    ? `${BASE_URL}/uploads/${about.profileImage}`
     : null;
 
   const resumeURL = about?.resume
-    ? `http://localhost:5000/uploads/${about.resume}`
+    ? `${BASE_URL}/uploads/${about.resume}`
     : null;
   const heroImageUrl = media.hero
-    ? `http://localhost:5000${media.hero.url}`
+    ? `${BASE_URL}${media.hero.url}`
     : null;
   const servicesImageUrl = media.services
-    ? `http://localhost:5000${media.services.url}`
+    ? `${BASE_URL}${media.services.url}`
     : null;
   const experienceImageUrl = media.experience
-    ? `http://localhost:5000${media.experience.url}`
+    ? `${BASE_URL}${media.experience.url}`
     : null;
   const testimonialsImageUrl = media.testimonials
-    ? `http://localhost:5000${media.testimonials.url}`
+    ? `${BASE_URL}${media.testimonials.url}`
     : null;
 
   console.log("Hero image URL:", heroImageUrl);
@@ -760,7 +761,7 @@ export default function Home() {
                     >
                       {b.image && (
                         <img
-                          src={`http://localhost:5000/uploads/${b.image}`}
+                          src={`${BASE_URL}/uploads${b.image}`}
                           alt={b.title}
                           className="w-full h-40 object-cover rounded-lg mb-4"
                         />
