@@ -162,7 +162,7 @@ export default function Home() {
   const name = about?.name || "Your Name";
   const title = about?.title || "Developer";
   const bio = about?.bio || "";
-  const BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";  
+  const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000"; 
 
   const profileImageURL = about?.profileImage
     ? `${BASE_URL}/uploads/${about.profileImage}`
