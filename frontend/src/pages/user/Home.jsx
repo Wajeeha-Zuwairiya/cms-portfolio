@@ -1,4 +1,4 @@
-// src/pages/user/Home.jsx
+// src/pages/Home.jsx
 import React, { useEffect, useState, useCallback } from "react";
 import * as FaIcons from "react-icons/fa";
 import { motion } from "framer-motion";
@@ -162,28 +162,7 @@ export default function Home() {
   const name = about?.name || "Your Name";
   const title = about?.title || "Developer";
   const bio = about?.bio || "";
- const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
-
-  /**
-   * UNIVERSAL IMAGE RESOLVER
-   * Handles: Base64, Full URLs, /uploads/path, and raw filenames
-   */
-  const getResolvedImageUrl = useCallback((imgData) => {
-    if (!imgData) return null;
-    if (imgData.startsWith("data:")) return imgData;
-    if (imgData.startsWith("http")) return imgData;
-
-    // Remove leading slash from imgData to avoid double slashes with BASE_URL/uploads/
-    const cleanData = imgData.startsWith("/") ? imgData.substring(1) : imgData;
-
-    // If the string already contains 'uploads', don't add it again
-    if (cleanData.includes("uploads/")) {
-      return `${BASE_URL}/${cleanData}`;
-    }
-
-    // Default to the uploads folder
-    return `${BASE_URL}/uploads/${cleanData}`;
-  }, [BASE_URL]);
+  const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";  
 
   const profileImageURL = about?.profileImage
     ? `${BASE_URL}/uploads/${about.profileImage}`
@@ -782,7 +761,7 @@ export default function Home() {
                     >
                       {b.image && (
                         <img
-                          src=""
+                          src={`${BASE_URL}/uploads${b.image}`}
                           alt={b.title}
                           className="w-full h-40 object-cover rounded-lg mb-4"
                         />
