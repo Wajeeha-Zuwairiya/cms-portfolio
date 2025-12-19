@@ -18,7 +18,10 @@ const contactRoutes = require("./routes/contactRoutes");
 const mediaRoutes = require("./routes/mediaRoutes");
 
 const app = express();
-
+// Add this at the top of your routes
+app.get('/', (req, res) => {
+  res.send('API is running...');
+});
 // --- MIDDLEWARES ---
 app.use(cors({ 
   origin: process.env.CLIENT_URL, 
