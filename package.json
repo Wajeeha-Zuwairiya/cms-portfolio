@@ -1,8 +1,11 @@
 {
   "name": "cms-portfolio-root",
-  "version": "1.0.0",
   "private": true,
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
   "scripts": {
-    "build": "npm run build --prefix frontend"
+    "build": "npm run build --workspace=frontend"
   }
 }
