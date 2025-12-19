@@ -16,7 +16,17 @@ exports.login = async (req, res) => {
     if (!match) return res.status(401).json({ msg: "Invalid credentials" });
 
     const token = generateToken(admin);
-    res.json({ token });
+
+    // ✅ THIS IS THE MISSING PIECE
+    res.cookie("token", token, {
+      httpOnly: true,     // Security: prevent XSS
+      secure: true,       // Required for HTTPS (Vercel)
+      sameSite: "none",   // Required for cross-site cookies
+      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+    });
+
+    // Don't send the token in the JSON body anymore
+    res.json({ msg: "Login successful", admin: { email: admin.email } });
   } catch (err) {
     console.error(err);
     res.status(500).json({ msg: "Server error" });
