@@ -22,11 +22,16 @@ const app = express();
 app.get('/', (req, res) => {
   res.send('API is running...');
 });
+
 // --- MIDDLEWARES ---
-app.use(cors({ 
-  origin: process.env.CLIENT_URL, 
-  credentials: true 
-}));
+const corsOptions = {
+  origin: process.env.CLIENT_URL || "http://localhost:5173",
+  credentials: true,
+  optionsSuccessStatus: 200
+};
+
+app.use(cors(corsOptions));
+app.options("*", cors(corsOptions)); // This handles the pre-flight check
 app.use(cookieParser());
 
 // IMPORTANT: Increase JSON limit because Base64 strings are large
