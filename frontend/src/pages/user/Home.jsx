@@ -782,7 +782,7 @@ export default function Home() {
                     >
                       {b.image && (
                         <img
-                          src={getImg(b.image)}
+                          src={getResolvedImageUrl(b.image)}
                           alt={b.title}
                           className="w-full h-40 object-cover rounded-lg mb-4"
                         />
