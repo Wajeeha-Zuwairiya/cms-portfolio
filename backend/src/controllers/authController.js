@@ -22,6 +22,7 @@ exports.login = async (req, res) => {
       httpOnly: true,     // Security: prevent XSS
       secure: true,       // Required for HTTPS (Vercel)
       sameSite: "none",   // Required for cross-site cookies
+      path: "/", // ✅ Add this to ensure it's available everywhere
       maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
     });
 
