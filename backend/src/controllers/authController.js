@@ -17,14 +17,16 @@ exports.login = async (req, res) => {
 
     const token = generateToken(admin);
 
-    // ✅ THIS IS THE MISSING PIECE
-    res.cookie("token", token, {
-      httpOnly: true,     // Security: prevent XSS
-      secure: true,       // Required for HTTPS (Vercel)
-      sameSite: "none",   // Required for cross-site cookies
-      path: "/", // ✅ Add this to ensure it's available everywhere
-      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
-    });
+// ✅ YOU MUST ADD THIS BLOCK
+res.cookie("token", token, {
+  httpOnly: true,     // Prevents JavaScript access (XSS protection)
+  secure: true,       // REQUIRED for Vercel (HTTPS)
+  sameSite: "none",   // REQUIRED for cross-site (different subdomains)
+  path: "/",          // Available across the whole site
+  maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+});
+
+;
 
     // Don't send the token in the JSON body anymore
     res.json({ msg: "Login successful", admin: { email: admin.email } });
