@@ -18,6 +18,7 @@ const contactRoutes = require("./routes/contactRoutes");
 const mediaRoutes = require("./routes/mediaRoutes");
 
 const app = express();
+app.set("trust proxy", 1);
 // Add this at the top of your routes
 app.get('/', (req, res) => {
   res.send('API is running...');
