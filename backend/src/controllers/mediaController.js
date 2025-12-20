@@ -1,6 +1,4 @@
 const Media = require("../models/Media");
-const fs = require("fs");
-const path = require("path");
 
 // GET all media
 exports.getMedia = async (req, res) => {
@@ -12,42 +10,24 @@ exports.getMedia = async (req, res) => {
   }
 };
 
-// UPLOAD media (1 image per section)
+// CREATE / REPLACE media (1 image per section)
 exports.uploadMedia = async (req, res) => {
   try {
-    if (!req.file) {
-      return res.status(400).json({ message: "No file uploaded" });
+    const { section, url } = req.body;
+
+    if (!section || !url) {
+      return res.status(400).json({ message: "Section and URL are required" });
     }
 
-    const { section } = req.body;
-
-    if (!section) {
-      return res.status(400).json({ message: "Section is required" });
-    }
-
-    // 🔥 Find existing image for section
+    // remove existing media for section
     const existing = await Media.findOne({ section });
-
     if (existing) {
-      // delete old file
-      const oldPath = path.join(
-        __dirname,
-        "../uploads",
-        path.basename(existing.url)
-      );
-
-      if (fs.existsSync(oldPath)) {
-        fs.unlinkSync(oldPath);
-      }
-
-      // delete db record
       await Media.findByIdAndDelete(existing._id);
     }
 
-    // save new image
     const media = await Media.create({
       section,
-      url: `/uploads/${req.file.filename}`,
+      url, // ✅ Cloudinary URL
     });
 
     res.status(201).json(media);
@@ -64,16 +44,7 @@ exports.deleteMedia = async (req, res) => {
       return res.status(404).json({ message: "Media not found" });
     }
 
-    const filePath = path.join(
-      __dirname,
-      "../uploads",
-      path.basename(media.url)
-    );
-
-    if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
-    }
-
+    // ❌ No filesystem delete (Cloudinary handles storage)
     await Media.findByIdAndDelete(req.params.id);
 
     res.json({ message: "Media deleted" });
