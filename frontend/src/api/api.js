@@ -108,3 +108,4 @@ export default {
 uploadMedia: (data) =>
   api.post("/media", data),
 };
+deleteMedia: (id) => api.delete(`/media/${id}`),
