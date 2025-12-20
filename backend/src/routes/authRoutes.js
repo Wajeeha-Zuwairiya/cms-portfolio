@@ -17,13 +17,10 @@ const generateRefreshToken = (id) =>
   });
 
 // --- COOKIE OPTIONS (ENV SAFE) ---
-const isProd = process.env.NODE_ENV === "production";
-const isHttps = process.env.CLIENT_URL?.startsWith("https");
-
 const cookieOptions = {
   httpOnly: true,
-  secure: isProd && isHttps,   // 🔥 FIX
-  sameSite: isProd && isHttps ? "none" : "lax",
+  secure: true,        // 🔒 REQUIRED on Vercel
+  sameSite: "none",    // 🔒 REQUIRED for cross-site
   path: "/",
 };
 
