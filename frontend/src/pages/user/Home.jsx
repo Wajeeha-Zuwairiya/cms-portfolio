@@ -162,11 +162,20 @@ export default function Home() {
   const name = about?.name || "Your Name";
   const title = about?.title || "Developer";
   const bio = about?.bio || "";
-  const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";  
+  // Add this helper function at the top of your component
+const getImageUrl = (path) => {
+  if (!path) return null;
+  // If it's a full Cloudinary URL or a Base64 string, return as is
+  if (path.startsWith("http") || path.startsWith("data:")) return path;
+  // If it's an old local path, append the base URL
+  return `${api.defaults.baseURL}/uploads/${path}`;
+};
 
-  const profileImageURL = about?.profileImage
-    ? `${BASE_URL}/uploads/${about.profileImage}`
-    : null;
+// Use it for your Hero and Profile images
+const profileImageURL = getImageUrl(about?.profileImage);
+const heroImageUrl = getImageUrl(media.hero?.url);
+  
+  
 
   const resumeURL = about?.resume
     ? `${BASE_URL}/uploads/${about.resume}`
