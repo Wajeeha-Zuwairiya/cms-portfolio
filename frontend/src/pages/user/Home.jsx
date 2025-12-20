@@ -174,7 +174,6 @@ const heroImageUrl = getImageUrl(media.hero?.url);
 const servicesImageUrl = getImageUrl(media.services?.url);
 const experienceImageUrl = getImageUrl(media.experience?.url);
 const testimonialsImageUrl = getImageUrl(media.testimonials?.url);
-const resumeURL = window.open(getImageUrl(about?.resume));
   
 
   console.log("Hero image URL:", heroImageUrl);
@@ -321,7 +320,7 @@ const resumeURL = window.open(getImageUrl(about?.resume));
             <div className="mt-6 flex flex-wrap gap-4">
               {resumeURL ? (
                 <motion.a
-                  href={resumeURL}
+                  href=window.open(getImageUrl(about?.resume));
                   target="_blank"
                   rel="noopener noreferrer"
                   className="px-8 py-3 bg-[#00b7c7] text-gray-900 font-semibold rounded-full"
