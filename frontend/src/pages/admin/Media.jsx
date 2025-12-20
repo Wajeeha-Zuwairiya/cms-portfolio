@@ -101,7 +101,7 @@ const Media = () => {
                 <tr key={item._id} className="border-t">
                   <td className="p-2 text-center">
                     <img
-                      src={`http://localhost:5000${item.url}`}
+                      src={item.url}
                       alt={item.section}
                       className="h-16 w-28 object-cover mx-auto rounded"
                     />
