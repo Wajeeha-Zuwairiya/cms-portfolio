@@ -1,6 +1,7 @@
 import axios from "axios";
 
-const API_BASE = "http://localhost:5000";
+// This checks if a server URL exists; otherwise, it defaults to localhost
+const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 
 // Axios instance
 const api = axios.create({
