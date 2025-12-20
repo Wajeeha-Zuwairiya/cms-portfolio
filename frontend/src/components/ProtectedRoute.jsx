@@ -16,7 +16,7 @@ const ProtectedRoute = ({ children }) => {
 
   if (loading) return null;
 
-  return authorized ? children : <Navigate to="/admin/login" />;
+  return authorized ? children : <Navigate to="/admin/login" replace />;
 };
 
 export default ProtectedRoute;
