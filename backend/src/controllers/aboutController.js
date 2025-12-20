@@ -1,16 +1,4 @@
 const About = require("../models/About");
-const fs = require("fs");
-const path = require("path");
-
-const uploadsDir = path.join(__dirname, "..", "uploads");
-
-const deleteFileIfExists = (filename) => {
-  if (!filename) return;
-  const filePath = path.join(uploadsDir, filename);
-  if (fs.existsSync(filePath)) {
-    fs.unlinkSync(filePath);
-  }
-};
 
 // GET (single About)
 exports.getAbout = async (req, res) => {
@@ -22,7 +10,7 @@ exports.getAbout = async (req, res) => {
   }
 };
 
-// POST (CREATE OR UPDATE – singleton)
+// CREATE / UPDATE (singleton)
 exports.createAbout = async (req, res) => {
   try {
     const existing = await About.findOne();
@@ -34,30 +22,20 @@ exports.createAbout = async (req, res) => {
       email: req.body.email ?? existing?.email,
       phone: req.body.phone ?? existing?.phone,
       location: req.body.location ?? existing?.location,
+
+      socialLinks: {
+        linkedin:
+          req.body.linkedin ?? existing?.socialLinks?.linkedin ?? "",
+        github:
+          req.body.github ?? existing?.socialLinks?.github ?? "",
+      },
+
+      // ✅ CLOUDINARY URLs
+      profileImage:
+        req.body.profileImage ?? existing?.profileImage ?? "",
+      resume:
+        req.body.resume ?? existing?.resume ?? "",
     };
-
-    // SOCIAL LINKS (SAFE)
-    data.socialLinks = {
-  linkedin: req.body.linkedin ?? existing?.socialLinks?.linkedin ?? "",
-  github: req.body.github ?? existing?.socialLinks?.github ?? "",
-};
-
-
-    // PROFILE IMAGE
-    if (req.files?.profileImage?.[0]) {
-      if (existing?.profileImage) deleteFileIfExists(existing.profileImage);
-      data.profileImage = req.files.profileImage[0].filename;
-    } else if (existing) {
-      data.profileImage = existing.profileImage;
-    }
-
-    // RESUME
-    if (req.files?.resume?.[0]) {
-      if (existing?.resume) deleteFileIfExists(existing.resume);
-      data.resume = req.files.resume[0].filename;
-    } else if (existing) {
-      data.resume = existing.resume;
-    }
 
     const about = existing
       ? await About.findByIdAndUpdate(existing._id, data, { new: true })
@@ -69,9 +47,7 @@ exports.createAbout = async (req, res) => {
   }
 };
 
-
-
-// DELETE (delete the single About)
+// DELETE (singleton)
 exports.deleteAbout = async (req, res) => {
   try {
     const about = await About.findOne();
@@ -79,9 +55,7 @@ exports.deleteAbout = async (req, res) => {
       return res.status(404).json({ message: "About not found" });
     }
 
-    deleteFileIfExists(about.profileImage);
-    deleteFileIfExists(about.resume);
-
+    // ❌ NO FILE DELETION (Cloudinary handles storage)
     await About.findByIdAndDelete(about._id);
 
     res.json({ message: "About deleted" });
