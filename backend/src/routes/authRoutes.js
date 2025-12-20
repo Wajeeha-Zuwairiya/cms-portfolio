@@ -16,14 +16,16 @@ const generateRefreshToken = (id) =>
     expiresIn: "7d",
   });
 
-// --- COOKIE OPTIONS (Production Optimized) ---
+// --- COOKIE OPTIONS (ENV SAFE) ---
+const isProduction = process.env.NODE_ENV === "production";
+
 const cookieOptions = {
   httpOnly: true,
-  secure: true,      // Required for Vercel/HTTPS
-  sameSite: "none",  // Required for cross-domain (frontend vs backend subdomains)
+  secure: isProduction,
+  sameSite: isProduction ? "none" : "lax",
   path: "/",
-  maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
 };
+
 
 // @route   POST /auth/login
 router.post("/login", async (req, res) => {
