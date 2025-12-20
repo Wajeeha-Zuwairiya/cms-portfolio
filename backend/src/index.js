@@ -26,6 +26,7 @@ app.get('/', (req, res) => {
 
 // --- MIDDLEWARES ---
 const allowedOrigins = [
+  "https://wajeehazuwairiya.vercel.app", // Add this explicitly
   process.env.CLIENT_URL,
   "http://localhost:5173",
 ];
