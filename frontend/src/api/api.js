@@ -100,9 +100,11 @@ export default {
 
   // ================= MEDIA =================
   getMedia: () => api.get("/media"),
-  uploadMedia: (formData) =>
-    api.post("/media", formData, {
-      headers: { "Content-Type": "multipart/form-data" },
-    }),
-  deleteMedia: (id) => api.delete(`/media/${id}`),
+  uploadImage: (data) =>
+  api.post("/upload/image", data, {
+    headers: { "Content-Type": "multipart/form-data" },
+  }),
+
+uploadMedia: (data) =>
+  api.post("/media", data),
 };
