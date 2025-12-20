@@ -105,22 +105,47 @@ app.get("/debug/cookies", (req, res) => {
 
 app.post("/upload/image", upload.single("file"), async (req, res) => {
   try {
-    if (!req.file) return res.status(400).json({ msg: "No file uploaded" });
+    if (!req.file) {
+      return res.status(400).json({ msg: "No file uploaded" });
+    }
+
+    // Optional: validate mime types
+    const allowedTypes = [
+      "image/jpeg",
+      "image/png",
+      "image/webp",
+      "application/pdf",
+    ];
+
+    if (!allowedTypes.includes(req.file.mimetype)) {
+      return res.status(400).json({ msg: "Invalid file type" });
+    }
 
     cloudinary.uploader.upload_stream(
-      { 
+      {
         folder: "portfolio",
-        resource_type: "auto" // 👈 Add this to allow PDFs (Resume)
-      }, 
+        resource_type: "auto", // images + PDFs
+      },
       (error, result) => {
-        if (error) return res.status(500).json({ msg: "Upload Error", error });
-        res.json({ url: result.secure_url }); // This returns the permanent https link
+        if (error) {
+          return res.status(500).json({
+            msg: "Cloudinary upload failed",
+            error,
+          });
+        }
+
+        res.json({
+          url: result.secure_url,
+          public_id: result.public_id, // 🔥 store this if you want deletion later
+        });
       }
     ).end(req.file.buffer);
+
   } catch (error) {
-    res.status(500).json({ msg: "Error processing image", error });
+    res.status(500).json({ msg: "Upload error", error });
   }
 });
+
 
 // --- EXPORT FOR VERCEL ---
 module.exports = app;
