@@ -26,20 +26,28 @@ const Media = () => {
   const handleUpload = async () => {
   if (!file) return toast.error("Select an image");
 
-  const formData = new FormData();
-  formData.append("file", file);
-  formData.append("section", section);
-
   try {
-    // Ensure your backend media route also uses the Cloudinary upload logic!
-    await api.uploadMedia(formData); 
-    toast.success("Section image updated on Cloudinary");
+    // STEP 1: Upload to Cloudinary
+    const uploadData = new FormData();
+    uploadData.append("file", file);
+
+    const uploadRes = await api.uploadImage(uploadData);
+    const imageUrl = uploadRes.data.url;
+
+    // STEP 2: Save URL + section in DB
+    await api.uploadMedia({
+      section,
+      url: imageUrl,
+    });
+
+    toast.success("Section image updated");
     setFile(null);
     fetchMedia();
-  } catch {
+  } catch (err) {
     toast.error("Upload failed");
   }
 };
+
 
   const handleDelete = async (id) => {
     if (!window.confirm("Delete this image?")) return;
