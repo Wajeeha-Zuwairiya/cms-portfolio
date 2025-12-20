@@ -68,15 +68,15 @@ app.use(async (req, res, next) => {
   next();
 });
 
-// --- BASE64 IMAGE UPLOAD CONFIG ---
-// We use memoryStorage because Vercel doesn't allow writing to disk
-const storage = multer.memoryStorage();
-const upload = multer({ 
-  storage,
-  limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit per image
+// The actual upload endpoint used by your Admin Panel
+const cloudinary = require("cloudinary").v2;
+
+// Add your credentials (ensure these are in your Vercel/Local .env)
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 });
-
-
 
 // --- ROUTES ---
 app.use("/auth", authRoutes);
@@ -96,19 +96,25 @@ app.get("/debug/cookies", (req, res) => {
   });
 });
 
-// The actual upload endpoint used by your Admin Panel
-app.post("/upload/image", upload.single("file"), (req, res) => {
+
+// Update the upload route
+app.post("/upload/image", upload.single("file"), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ msg: "No file uploaded" });
 
-    // Convert image buffer to a Base64 string
-    const base64String = req.file.buffer.toString("base64");
-    const imageUrl = `data:${req.file.mimetype};base64,${base64String}`;
+    // Stream the buffer to Cloudinary
+    cloudinary.uploader.upload_stream(
+      { folder: "portfolio" }, 
+      (error, result) => {
+        if (error) return res.status(500).json({ msg: "Upload Error", error });
+        
+        // Return the permanent URL instead of a Base64 string
+        res.json({ url: result.secure_url });
+      }
+    ).end(req.file.buffer);
 
-    // Return the string to the frontend so it can be saved in the DB
-    res.json({ url: imageUrl });
   } catch (error) {
-    res.status(500).json({ msg: "Error processing image" });
+    res.status(500).json({ msg: "Error processing image", error });
   }
 });
 
