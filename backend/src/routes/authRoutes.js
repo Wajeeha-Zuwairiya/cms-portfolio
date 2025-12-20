@@ -3,6 +3,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const Admin = require("../models/Admin");
 const auth = require("../middleware/auth");
+const { updateAdmin } = require("../controllers/authController");
 
 // JWT utils - Synchronized with your .env names
 const generateAccessToken = (id) =>
@@ -83,5 +84,6 @@ router.get("/me", auth, async (req, res) => {
     res.status(500).json({ msg: "Server error" });
   }
 });
+router.put("/update", auth, updateAdmin);
 
 module.exports = router;
