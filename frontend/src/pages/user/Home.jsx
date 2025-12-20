@@ -165,33 +165,17 @@ export default function Home() {
   // Add this helper function at the top of your component
 const getImageUrl = (path) => {
   if (!path) return null;
-  // If it's a full Cloudinary URL or a Base64 string, return as is
   if (path.startsWith("http") || path.startsWith("data:")) return path;
-  // If it's an old local path, append the base URL
-  return `${api.defaults.baseURL}/uploads/${path}`;
+  return `${BASE_URL}/uploads/${path}`; // Fallback for old files
 };
 
-// Use it for your Hero and Profile images
 const profileImageURL = getImageUrl(about?.profileImage);
 const heroImageUrl = getImageUrl(media.hero?.url);
+const servicesImageUrl = getImageUrl(media.services?.url);
+const experienceImageUrl = getImageUrl(media.experience?.url);
+const testimonialsImageUrl = getImageUrl(media.testimonials?.url);
+const resumeURL = window.open(getImageUrl(about?.resume));
   
-  
-
-  const resumeURL = about?.resume
-    ? `${BASE_URL}/uploads/${about.resume}`
-    : null;
-  const heroImageUrl = media.hero
-    ? `${BASE_URL}${media.hero.url}`
-    : null;
-  const servicesImageUrl = media.services
-    ? `${BASE_URL}${media.services.url}`
-    : null;
-  const experienceImageUrl = media.experience
-    ? `${BASE_URL}${media.experience.url}`
-    : null;
-  const testimonialsImageUrl = media.testimonials
-    ? `${BASE_URL}${media.testimonials.url}`
-    : null;
 
   console.log("Hero image URL:", heroImageUrl);
 
@@ -770,7 +754,7 @@ const heroImageUrl = getImageUrl(media.hero?.url);
                     >
                       {b.image && (
                         <img
-                          src={`${BASE_URL}/uploads${b.image}`}
+                          src={getImageUrl(b.image)}
                           alt={b.title}
                           className="w-full h-40 object-cover rounded-lg mb-4"
                         />
