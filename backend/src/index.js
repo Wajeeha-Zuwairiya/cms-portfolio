@@ -88,6 +88,12 @@ app.use("/testimonials", testimonialRoutes);
 app.use("/experience", experienceRoutes);
 app.use("/contact", contactRoutes);
 app.use("/media", mediaRoutes);
+app.get("/debug/cookies", (req, res) => {
+  res.json({
+    cookies: req.cookies,
+    headers: req.headers.cookie || null,
+  });
+});
 
 // The actual upload endpoint used by your Admin Panel
 app.post("/upload/image", upload.single("file"), (req, res) => {
