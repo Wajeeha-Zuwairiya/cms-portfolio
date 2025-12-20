@@ -63,31 +63,41 @@ const About = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setSaving(true);
+  e.preventDefault();
+  setSaving(true);
+  try {
+    // 1. Create a copy of the current form text data
+    const finalData = { ...form };
 
-    const formData = new FormData();
-    formData.append("name", form.name);
-    formData.append("title", form.title);
-    formData.append("bio", form.bio);
-    formData.append("email", form.email);
-    formData.append("phone", form.phone);
-    formData.append("location", form.location);
-    formData.append("linkedin", form.linkedin);
-    formData.append("github", form.github);
-    if (form.profileImage) formData.append("profileImage", form.profileImage);
-    if (form.resume) formData.append("resume", form.resume);
-
-    try {
-      await api.createAbout(formData);
-      toast.success("About updated successfully");
-      fetchAbout();
-    } catch (err) {
-      toast.error("Failed to save About");
-    } finally {
-      setSaving(false);
+    // 2. Check if a NEW Profile Image was selected
+    if (form.profileImage instanceof File) {
+      const imgData = new FormData();
+      imgData.append("file", form.profileImage);
+      // We call the general upload endpoint we made in index.js
+      const imgRes = await api.uploadImage(imgData); 
+      finalData.profileImage = imgRes.data.url; // Save the Cloudinary HTTPS link
     }
-  };
+
+    // 3. Check if a NEW Resume PDF was selected
+    if (form.resume instanceof File) {
+      const resData = new FormData();
+      resData.append("file", form.resume);
+      const resRes = await api.uploadImage(resData);
+      finalData.resume = resRes.data.url; // Save the Cloudinary HTTPS link
+    }
+
+    // 4. Send the final data (which now contains URLs, not Files) to MongoDB
+    await api.createAbout(finalData);
+    
+    toast.success("About & Resume updated successfully!");
+    fetchAbout(); // Refresh data
+  } catch (err) {
+    console.error(err);
+    toast.error("Error saving profile data");
+  } finally {
+    setSaving(false);
+  }
+};
 
   const handleClear = () => {
     setForm(savedData);
