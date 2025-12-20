@@ -10,7 +10,7 @@ const router = express.Router();
 
 
 router.get("/", getMedia);
-router.post("/", upload.single("file"), uploadMedia);
+router.post("/", mediaController.uploadMedia);
 router.delete("/:id", deleteMedia);
 
 module.exports = router;
