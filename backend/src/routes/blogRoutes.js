@@ -2,11 +2,6 @@ const router = require("express").Router();
 const blogController = require("../controllers/blogController");
 const auth = require("../middleware/auth");
 
-const multer = require("multer");
-const path = require("path");
-
-
-
 // GET all blogs
 router.get("/", blogController.getBlogs);
 
