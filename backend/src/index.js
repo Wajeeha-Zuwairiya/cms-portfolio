@@ -17,6 +17,7 @@ const experienceRoutes = require("./routes/experienceRoutes");
 const contactRoutes = require("./routes/contactRoutes");
 const mediaRoutes = require("./routes/mediaRoutes");
 
+
 const app = express();
 app.set("trust proxy", 1);
 // Add this at the top of your routes
@@ -41,9 +42,14 @@ const corsOptions = {
   methods: ["GET", "POST", "PUT", "DELETE"],
 };
 
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB max
+});
+
+
 app.use(cors(corsOptions));
 app.options("*", cors(corsOptions)); // ✅ IMPORTANT: SAME OPTIONS
-
 app.use(cookieParser());
 
 // IMPORTANT: Increase JSON limit because Base64 strings are large
