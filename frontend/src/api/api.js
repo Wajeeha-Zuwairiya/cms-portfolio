@@ -17,8 +17,10 @@ api.interceptors.response.use(
 
     if (err.response?.status === 401 && !originalRequest._retry) {
 
-      // ✅ Prevent infinite refresh loop
-      if (originalRequest.url.endsWith("/auth/refresh")) {
+      if (
+        originalRequest.url.endsWith("/auth/refresh") ||
+        originalRequest.url.endsWith("/auth/login")
+      ) {
         window.location.href = "/admin/login";
         return Promise.reject(err);
       }
@@ -28,15 +30,16 @@ api.interceptors.response.use(
       try {
         await api.post("/auth/refresh");
         return api(originalRequest);
-      } catch (refreshError) {
+      } catch {
         window.location.href = "/admin/login";
-        return Promise.reject(refreshError);
+        return Promise.reject(err);
       }
     }
 
     return Promise.reject(err);
   }
 );
+
 
 
 export default {
