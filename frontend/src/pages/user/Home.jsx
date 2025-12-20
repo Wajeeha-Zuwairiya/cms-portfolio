@@ -162,26 +162,19 @@ export default function Home() {
   const name = about?.name || "Your Name";
   const title = about?.title || "Developer";
   const bio = about?.bio || "";
+  // Add this helper function at the top of your component
+const getImageUrl = (path) => {
+  if (!path) return null;
+  if (path.startsWith("http") || path.startsWith("data:")) return path;
+  return `${BASE_URL}/uploads/${path}`; // Fallback for old files
+};
 
-  const profileImageURL = about?.profileImage
-    ? `http://localhost:5000/uploads/${about.profileImage}`
-    : null;
-
-  const resumeURL = about?.resume
-    ? `http://localhost:5000/uploads/${about.resume}`
-    : null;
-  const heroImageUrl = media.hero
-    ? `http://localhost:5000${media.hero.url}`
-    : null;
-  const servicesImageUrl = media.services
-    ? `http://localhost:5000${media.services.url}`
-    : null;
-  const experienceImageUrl = media.experience
-    ? `http://localhost:5000${media.experience.url}`
-    : null;
-  const testimonialsImageUrl = media.testimonials
-    ? `http://localhost:5000${media.testimonials.url}`
-    : null;
+const profileImageURL = getImageUrl(about?.profileImage);
+const heroImageUrl = getImageUrl(media.hero?.url);
+const servicesImageUrl = getImageUrl(media.services?.url);
+const experienceImageUrl = getImageUrl(media.experience?.url);
+const testimonialsImageUrl = getImageUrl(media.testimonials?.url);
+  
 
   console.log("Hero image URL:", heroImageUrl);
 
@@ -327,7 +320,7 @@ export default function Home() {
             <div className="mt-6 flex flex-wrap gap-4">
               {resumeURL ? (
                 <motion.a
-                  href=window.open(getImageUrl(about?.resume));
+                  href={resumeURL}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="px-8 py-3 bg-[#00b7c7] text-gray-900 font-semibold rounded-full"
@@ -760,7 +753,7 @@ export default function Home() {
                     >
                       {b.image && (
                         <img
-                          src={`http://localhost:5000/uploads/${b.image}`}
+                          src={getImageUrl(b.image)}
                           alt={b.title}
                           className="w-full h-40 object-cover rounded-lg mb-4"
                         />
