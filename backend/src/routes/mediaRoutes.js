@@ -1,4 +1,5 @@
 const express = require("express");
+const auth = require("../middleware/auth");
 
 const {
   getMedia,
@@ -10,7 +11,7 @@ const router = express.Router();
 
 
 router.get("/", getMedia);
-router.post("/", mediaController.uploadMedia);
-router.delete("/:id", deleteMedia);
+router.post("/",auth, mediaController.uploadMedia);
+router.delete("/:id",auth, deleteMedia);
 
 module.exports = router;
