@@ -45,34 +45,42 @@ const Blogs = () => {
 
   // Submit form
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!form.title || !form.description) {
-      toast.error("Title and Description are required");
-      return;
+  e.preventDefault();
+  if (!form.title || !form.description) {
+    return toast.error("Title and Description are required");
+  }
+
+  try {
+    let finalImageUrl = form.image;
+
+    // If a new image file is selected, upload it to Cloudinary first
+    if (form.image instanceof File) {
+      const data = new FormData();
+      data.append("file", form.image);
+      const res = await api.uploadImage(data);
+      finalImageUrl = res.data.url;
     }
 
-    const formData = new FormData();
-    formData.append("title", form.title);
-    formData.append("description", form.description);
-    formData.append("link", form.link);
-    if (form.image) formData.append("image", form.image);
+    const payload = { ...form, image: finalImageUrl };
 
-    try {
-      if (editingId) {
-        await api.updateBlog(editingId, formData);
-        toast.success("Blog updated!");
-      } else {
-        await api.createBlog(formData);
-        toast.success("Blog added!");
-      }
-      resetForm();
-      fetchBlogs();
-    } catch (err) {
-      console.error(err);
-      toast.error("Error saving blog");
+    if (editingId) {
+      await api.updateBlog(editingId, payload);
+      toast.success("Blog updated!");
+    } else {
+      await api.createBlog(payload);
+      toast.success("Blog created!");
     }
-  };
 
+    // Reset UI
+    setForm(initialForm);
+    setEditingId(null);
+    setModalOpen(false);
+    fetchBlogs();
+  } catch (err) {
+    console.error(err);
+    toast.error("Failed to save blog");
+  }
+};
   const resetForm = () => {
     setForm(initialForm);
     setEditingId(null);
