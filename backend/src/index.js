@@ -97,22 +97,20 @@ app.get("/debug/cookies", (req, res) => {
 });
 
 
-// Update the upload route
 app.post("/upload/image", upload.single("file"), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ msg: "No file uploaded" });
 
-    // Stream the buffer to Cloudinary
     cloudinary.uploader.upload_stream(
-      { folder: "portfolio" }, 
+      { 
+        folder: "portfolio",
+        resource_type: "auto" // 👈 Add this to allow PDFs (Resume)
+      }, 
       (error, result) => {
         if (error) return res.status(500).json({ msg: "Upload Error", error });
-        
-        // Return the permanent URL instead of a Base64 string
-        res.json({ url: result.secure_url });
+        res.json({ url: result.secure_url }); // This returns the permanent https link
       }
     ).end(req.file.buffer);
-
   } catch (error) {
     res.status(500).json({ msg: "Error processing image", error });
   }
