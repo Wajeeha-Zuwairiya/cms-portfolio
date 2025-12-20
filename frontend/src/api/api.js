@@ -15,32 +15,29 @@ api.interceptors.response.use(
   async (err) => {
     const originalRequest = err.config;
 
-    // 1. Check if the error is 401 and not already retried
     if (err.response?.status === 401 && !originalRequest._retry) {
-      
-      // 2. CRITICAL: If the request that failed WAS the refresh call, stop looping!
-      if (originalRequest.url.includes("/auth/refresh")) {
-        window.location.href = "/admin/login"; 
+
+      // ✅ Prevent infinite refresh loop
+      if (originalRequest.url.endsWith("/auth/refresh")) {
+        window.location.href = "/admin/login";
         return Promise.reject(err);
       }
 
       originalRequest._retry = true;
 
       try {
-        // Use the instance to refresh
         await api.post("/auth/refresh");
-        // Retry original request
         return api(originalRequest);
       } catch (refreshError) {
-        // 3. If refresh fails (e.g., refresh token expired), go to login
-        console.error("Refresh failed, redirecting to login...");
         window.location.href = "/admin/login";
         return Promise.reject(refreshError);
       }
     }
+
     return Promise.reject(err);
   }
 );
+
 
 export default {
   // ================= AUTH =================
