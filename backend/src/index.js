@@ -25,15 +25,30 @@ app.get('/', (req, res) => {
 });
 
 // --- MIDDLEWARES ---
-const corsOptions = {
-  origin: process.env.CLIENT_URL || "http://localhost:5173",
-  credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE"],
-  optionsSuccessStatus: 200
-};
+const allowedOrigins = [
+  process.env.CLIENT_URL, // ✅ your frontend URL
+  "http://localhost:5173",
+];
 
-app.use(cors(corsOptions));
-app.options("*", cors(corsOptions)); // This handles the pre-flight check
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // allow server-to-server & Postman
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(new Error("Not allowed by CORS"));
+    },
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE"],
+  })
+);
+
+// Handle preflight
+app.options("*", cors());
 app.use(cookieParser());
 
 // IMPORTANT: Increase JSON limit because Base64 strings are large
