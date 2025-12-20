@@ -17,12 +17,13 @@ const generateRefreshToken = (id) =>
   });
 
 // --- COOKIE OPTIONS (ENV SAFE) ---
-const isProduction = process.env.NODE_ENV === "production";
+const isProd = process.env.NODE_ENV === "production";
+const isHttps = process.env.CLIENT_URL?.startsWith("https");
 
 const cookieOptions = {
   httpOnly: true,
-  secure: process.env.NODE_ENV === "production",
-  sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+  secure: isProd && isHttps,   // 🔥 FIX
+  sameSite: isProd && isHttps ? "none" : "lax",
   path: "/",
 };
 
