@@ -66,34 +66,30 @@ const About = () => {
   e.preventDefault();
   setSaving(true);
   try {
-    // 1. Create a copy of the current form text data
-    const finalData = { ...form };
+    const finalForm = { ...form };
 
-    // 2. Check if a NEW Profile Image was selected
+    // 1. If a new Profile Image was selected, upload it
     if (form.profileImage instanceof File) {
-      const imgData = new FormData();
-      imgData.append("file", form.profileImage);
-      // We call the general upload endpoint we made in index.js
-      const imgRes = await api.uploadImage(imgData); 
-      finalData.profileImage = imgRes.data.url; // Save the Cloudinary HTTPS link
+      const data = new FormData();
+      data.append("file", form.profileImage);
+      const res = await api.uploadImage(data); // uses the /upload/image route
+      finalForm.profileImage = res.data.url;
     }
 
-    // 3. Check if a NEW Resume PDF was selected
+    // 2. If a new Resume was selected, upload it
     if (form.resume instanceof File) {
-      const resData = new FormData();
-      resData.append("file", form.resume);
-      const resRes = await api.uploadImage(resData);
-      finalData.resume = resRes.data.url; // Save the Cloudinary HTTPS link
+      const data = new FormData();
+      data.append("file", form.resume);
+      const res = await api.uploadImage(data);
+      finalForm.resume = res.data.url;
     }
 
-    // 4. Send the final data (which now contains URLs, not Files) to MongoDB
-    await api.createAbout(finalData);
-    
-    toast.success("About & Resume updated successfully!");
-    fetchAbout(); // Refresh data
+    // 3. Save the URLs to MongoDB
+    await api.createAbout(finalForm);
+    toast.success("Profile and Resume updated!");
+    fetchAbout();
   } catch (err) {
-    console.error(err);
-    toast.error("Error saving profile data");
+    toast.error("Update failed");
   } finally {
     setSaving(false);
   }
