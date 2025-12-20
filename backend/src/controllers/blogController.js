@@ -3,7 +3,7 @@ const Blog = require("../models/Blog");
 // GET all blogs
 exports.getBlogs = async (req, res) => {
   try {
-    const blogs = await Blog.find();
+    const blogs = await Blog.find().sort({ createdAt: -1 });
     res.json(blogs);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -13,9 +13,15 @@ exports.getBlogs = async (req, res) => {
 // CREATE blog
 exports.createBlog = async (req, res) => {
   try {
-    const { title, description, link } = req.body;
-    const image = req.file ? req.file.filename : ""; // multer will set req.file
-    const blog = await Blog.create({ title, description, link, image });
+    const { title, description, link, image } = req.body;
+
+    const blog = await Blog.create({
+      title,
+      description,
+      link,
+      image, // ✅ Cloudinary URL
+    });
+
     res.json(blog);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -25,11 +31,21 @@ exports.createBlog = async (req, res) => {
 // UPDATE blog
 exports.updateBlog = async (req, res) => {
   try {
-    const { title, description, link } = req.body;
-    const updateData = { title, description, link };
-    if (req.file) updateData.image = req.file.filename;
+    const { title, description, link, image } = req.body;
 
-    const blog = await Blog.findByIdAndUpdate(req.params.id, updateData, { new: true });
+    const updateData = {
+      ...(title && { title }),
+      ...(description && { description }),
+      ...(link && { link }),
+      ...(image && { image }), // ✅ Replace Cloudinary URL if changed
+    };
+
+    const blog = await Blog.findByIdAndUpdate(
+      req.params.id,
+      updateData,
+      { new: true }
+    );
+
     res.json(blog);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -45,4 +61,3 @@ exports.deleteBlog = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
-
