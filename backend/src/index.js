@@ -109,7 +109,6 @@ app.post("/upload/image", upload.single("file"), async (req, res) => {
       return res.status(400).json({ msg: "No file uploaded" });
     }
 
-    // Optional: validate mime types
     const allowedTypes = [
       "image/jpeg",
       "image/png",
@@ -121,26 +120,27 @@ app.post("/upload/image", upload.single("file"), async (req, res) => {
       return res.status(400).json({ msg: "Invalid file type" });
     }
 
-    cloudinary.uploader.upload_stream(
-      {
-        folder: "portfolio",
-        resource_type: "auto", // images + PDFs
-      },
-      (error, result) => {
-        if (error) {
-          return res.status(500).json({
-            msg: "Cloudinary upload failed",
-            error,
+    cloudinary.uploader
+      .upload_stream(
+        {
+          folder: "portfolio",
+          resource_type: "auto",
+        },
+        (error, result) => {
+          if (error) {
+            return res.status(500).json({
+              msg: "Cloudinary upload failed",
+              error,
+            });
+          }
+
+          // ✅ ONLY RETURN URL
+          res.json({
+            url: result.secure_url,
           });
         }
-
-        res.json({
-          url: result.secure_url,
-          public_id: result.public_id, // 🔥 store this if you want deletion later
-        });
-      }
-    ).end(req.file.buffer);
-
+      )
+      .end(req.file.buffer);
   } catch (error) {
     res.status(500).json({ msg: "Upload error", error });
   }
