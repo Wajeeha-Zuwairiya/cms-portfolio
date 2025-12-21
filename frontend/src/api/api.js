@@ -1,12 +1,11 @@
 import axios from "axios";
 
 // This checks if a server URL exists; otherwise, it defaults to localhost
-const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+export const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 
-// Axios instance
 const api = axios.create({
-  baseURL: API_BASE,
-  withCredentials: true, // ✅ REQUIRED for cookies
+  baseURL: BASE_URL, // Use the variable here
+  withCredentials: true,
 });
 
 // Auto refresh access token on 401
