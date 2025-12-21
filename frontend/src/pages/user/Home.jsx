@@ -11,8 +11,7 @@ import "swiper/css/scrollbar";
 import "swiper/css/a11y";
 
 import api,{ BASE_URL } from "../../api/api"; // adjust path if your api.js is in a different folder
-// Add this near your other constants
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+
 // Global animation used in motion elements
 const fadeUp = {
   initial: { opacity: 0, y: 10 },
