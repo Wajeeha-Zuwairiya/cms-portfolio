@@ -18,15 +18,25 @@ app.get("/", (req, res) => {
 // ================== CORS ==================
 const allowedOrigins = [
   "https://wajeehazuwairiya.vercel.app",
-  process.env.CLIENT_URL,
   "http://localhost:5173",
 ];
 
 const corsOptions = {
   origin: (origin, callback) => {
+    // 1. Allow requests with no origin (like mobile apps or Postman/Curl)
     if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin)) return callback(null, true);
-    return callback(new Error("Not allowed by CORS"));
+
+    // 2. Check if the origin is in our allowed list
+    // We use .includes() and also check process.env.CLIENT_URL if it exists
+    const isAllowed = allowedOrigins.includes(origin) || origin === process.env.CLIENT_URL;
+
+    if (isAllowed) {
+      callback(null, true);
+    } else {
+      // This will show up in your Vercel logs so you can see the EXACT string being rejected
+      console.error(`CORS Blocked Origin: ${origin}`); 
+      callback(new Error("Not allowed by CORS"));
+    }
   },
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
@@ -34,7 +44,7 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-app.options("*", cors(corsOptions)); // ✅ Global preflight
+app.options("*", cors(corsOptions));
 
 // ================== MIDDLEWARES ==================
 app.use(cookieParser());
