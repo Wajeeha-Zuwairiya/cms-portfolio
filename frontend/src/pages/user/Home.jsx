@@ -11,6 +11,8 @@ import "swiper/css/scrollbar";
 import "swiper/css/a11y";
 
 import api from "../../api/api"; // adjust path if your api.js is in a different folder
+// Add this near your other constants
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 // Global animation used in motion elements
 const fadeUp = {
   initial: { opacity: 0, y: 10 },
@@ -163,10 +165,19 @@ export default function Home() {
   const title = about?.title || "Developer";
   const bio = about?.bio || "";
   // Add this helper function at the top of your component
+/* ---------------------------
+   URL Helper
+   --------------------------- */
 const getImageUrl = (path) => {
   if (!path) return null;
-  if (path.startsWith("http") || path.startsWith("data:")) return path;
-  return `${BASE_URL}/uploads/${path}`; // Fallback for old files
+  
+  // If the path is already a full URL (Cloudinary), return it as is
+  if (path.startsWith("http") || path.startsWith("data:")) {
+    return path;
+  }
+  
+  // Otherwise, assume it's a local upload from the /uploads folder
+  return `${BASE_URL}/uploads/${path}`;
 };
 
 const profileImageURL = getImageUrl(about?.profileImage);
