@@ -1,6 +1,6 @@
 const About = require("../models/About");
 
-// GET (single About)
+// GET (singleton)
 exports.getAbout = async (req, res) => {
   try {
     const about = await About.findOne();
@@ -16,25 +16,24 @@ exports.createAbout = async (req, res) => {
     const existing = await About.findOne();
 
     const data = {
-      name: req.body.name ?? existing?.name,
-      title: req.body.title ?? existing?.title,
-      bio: req.body.bio ?? existing?.bio,
-      email: req.body.email ?? existing?.email,
-      phone: req.body.phone ?? existing?.phone,
-      location: req.body.location ?? existing?.location,
+      name: req.body.name || existing?.name || "",
+      title: req.body.title || existing?.title || "",
+      bio: req.body.bio || existing?.bio || "",
+      email: req.body.email || existing?.email || "",
+      phone: req.body.phone || existing?.phone || "",
+      location: req.body.location || existing?.location || "",
 
       socialLinks: {
         linkedin:
-          req.body.linkedin ?? existing?.socialLinks?.linkedin ?? "",
+          req.body.linkedin || existing?.socialLinks?.linkedin || "",
         github:
-          req.body.github ?? existing?.socialLinks?.github ?? "",
+          req.body.github || existing?.socialLinks?.github || "",
       },
 
-      // ✅ CLOUDINARY URLs
       profileImage:
-        req.body.profileImage ?? existing?.profileImage ?? "",
+        req.body.profileImage || existing?.profileImage || "",
       resume:
-        req.body.resume ?? existing?.resume ?? "",
+        req.body.resume || existing?.resume || "",
     };
 
     const about = existing
@@ -50,14 +49,7 @@ exports.createAbout = async (req, res) => {
 // DELETE (singleton)
 exports.deleteAbout = async (req, res) => {
   try {
-    const about = await About.findOne();
-    if (!about) {
-      return res.status(404).json({ message: "About not found" });
-    }
-
-    // ❌ NO FILE DELETION (Cloudinary handles storage)
-    await About.findByIdAndDelete(about._id);
-
+    await About.deleteMany({});
     res.json({ message: "About deleted" });
   } catch (err) {
     res.status(500).json({ message: err.message });
