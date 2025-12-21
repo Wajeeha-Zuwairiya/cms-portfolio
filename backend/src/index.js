@@ -6,53 +6,46 @@ const cookieParser = require("cookie-parser");
 const multer = require("multer");
 const cloudinary = require("cloudinary").v2;
 
-// ================== APP ==================
 const app = express();
 app.set("trust proxy", 1);
 
-// ================== BASIC ROUTE ==================
+// ================= BASIC =================
 app.get("/", (req, res) => {
   res.send("API is running...");
 });
 
-// ================== CORS ==================
-const allowedOrigins = [
-  "https://wajeehazuwairiya.vercel.app",
-  process.env.CLIENT_URL,
-  "http://localhost:5173",
-];
+// ================= ALLOWED ORIGINS =================
+const ALLOWED_ORIGIN = "https://wajeehazuwairiya.vercel.app";
 
 const corsOptions = {
-  origin: (origin, callback) => {
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin)) return callback(null, true);
-    return callback(new Error("Not allowed by CORS"));
+  origin: (origin, cb) => {
+    if (!origin || origin === ALLOWED_ORIGIN) return cb(null, true);
+    return cb(new Error("Not allowed by CORS"));
   },
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
 };
 
+// Global CORS (for normal routes)
 app.use(cors(corsOptions));
-app.options("*", cors(corsOptions)); // ✅ Global preflight
 
-// ================== MIDDLEWARES ==================
+// ================= MIDDLEWARES =================
 app.use(cookieParser());
 app.use(express.json({ limit: "10mb" }));
-app.use(express.urlencoded({ limit: "10mb", extended: true }));
+app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
-// ================== MONGODB ==================
+// ================= MONGODB =================
 let isConnected = false;
 
 const connectDB = async () => {
   if (isConnected) return;
-
   try {
-    const db = await mongoose.connect(process.env.MONGO_URI);
-    isConnected = db.connections[0].readyState;
+    const conn = await mongoose.connect(process.env.MONGO_URI);
+    isConnected = conn.connections[0].readyState;
     console.log("MongoDB connected");
   } catch (err) {
-    console.error("MongoDB connection error:", err);
+    console.error("MongoDB error:", err);
   }
 };
 
@@ -61,20 +54,20 @@ app.use(async (req, res, next) => {
   next();
 });
 
-// ================== CLOUDINARY ==================
+// ================= CLOUDINARY =================
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-// ================== MULTER ==================
+// ================= MULTER =================
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
+  limits: { fileSize: 10 * 1024 * 1024 },
 });
 
-// ================== ROUTES ==================
+// ================= ROUTES =================
 app.use("/auth", require("./routes/authRoutes"));
 app.use("/about", require("./routes/aboutRoutes"));
 app.use("/skills", require("./routes/skillRoutes"));
@@ -86,19 +79,36 @@ app.use("/experience", require("./routes/experienceRoutes"));
 app.use("/contact", require("./routes/contactRoutes"));
 app.use("/media", require("./routes/mediaRoutes"));
 
-// ================== DEBUG ==================
+// ================= DEBUG =================
 app.get("/debug/cookies", (req, res) => {
   res.json({
     cookies: req.cookies,
-    headers: req.headers.cookie || null,
+    raw: req.headers.cookie || null,
   });
 });
 
-// ================== CLOUDINARY UPLOAD ==================
-// ✅ IMPORTANT: Explicit OPTIONS handler (fixes CORS error)
-app.options("/upload/image", cors(corsOptions));
+// =================================================
+// 🔥🔥🔥 CORS-SAFE CLOUDINARY UPLOAD (VERCEL FIX)
+// =================================================
 
+// MANUAL PREFLIGHT — REQUIRED ON VERCEL
+app.options("/upload/image", (req, res) => {
+  res.setHeader("Access-Control-Allow-Origin", ALLOWED_ORIGIN);
+  res.setHeader("Access-Control-Allow-Credentials", "true");
+  res.setHeader("Access-Control-Allow-Methods", "POST,OPTIONS");
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    "Content-Type, Authorization"
+  );
+  return res.sendStatus(200);
+});
+
+// ACTUAL UPLOAD
 app.post("/upload/image", upload.single("file"), async (req, res) => {
+  // 🔥 FORCE CORS HEADERS (Vercel requirement)
+  res.setHeader("Access-Control-Allow-Origin", ALLOWED_ORIGIN);
+  res.setHeader("Access-Control-Allow-Credentials", "true");
+
   try {
     if (!req.file) {
       return res.status(400).json({ msg: "No file uploaded" });
@@ -121,28 +131,27 @@ app.post("/upload/image", upload.single("file"), async (req, res) => {
           folder: "portfolio",
           resource_type: "auto",
         },
-        (error, result) => {
-          if (error) {
-            return res.status(500).json({
-              msg: "Cloudinary upload failed",
-              error,
-            });
+        (err, result) => {
+          if (err) {
+            return res
+              .status(500)
+              .json({ msg: "Cloudinary upload failed" });
           }
 
-          // ✅ Only return URL (no public_id)
+          // ✅ RETURN ONLY URL
           res.json({ url: result.secure_url });
         }
       )
       .end(req.file.buffer);
-  } catch (error) {
-    res.status(500).json({ msg: "Upload error", error });
+  } catch (err) {
+    res.status(500).json({ msg: "Upload error" });
   }
 });
 
-// ================== EXPORT ==================
+// ================= EXPORT =================
 module.exports = app;
 
-// ================== LOCAL DEV ==================
+// ================= LOCAL DEV =================
 if (process.env.NODE_ENV !== "production") {
   const PORT = process.env.PORT || 5000;
   app.listen(PORT, () =>
