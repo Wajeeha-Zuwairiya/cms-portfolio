@@ -178,7 +178,7 @@ const getImageUrl = (path) => {
   // Otherwise, assume it's a local upload from the /uploads folder
   return `${BASE_URL}/uploads/${path}`;
 };
-
+const resumeURL = getImageUrl(about?.resume);
 const profileImageURL = getImageUrl(about?.profileImage);
 const heroImageUrl = getImageUrl(media.hero?.url);
 const servicesImageUrl = getImageUrl(media.services?.url);
