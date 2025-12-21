@@ -51,9 +51,7 @@ export default {
   // ================= ABOUT =================
   getAbout: () => api.get("/about"),
   createAbout: (data) =>
-    api.post("/about", data, {
-      headers: { "Content-Type": "multipart/form-data" },
-    }),
+    api.post("/about", data),
   deleteAbout: (id) => api.delete(`/about/${id}`),
 
   // ================= SKILLS =================
