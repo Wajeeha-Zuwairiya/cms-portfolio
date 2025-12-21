@@ -133,6 +133,8 @@ export default function Home() {
   /* ---------------------------
      Render Image Helper
      --------------------------- */
+  // Add this near your other constants
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
   const renderImage = (src, alt = "") => {
     if (!src)
       return (
