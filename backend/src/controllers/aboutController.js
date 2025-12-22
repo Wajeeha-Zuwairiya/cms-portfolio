@@ -24,16 +24,13 @@ exports.createAbout = async (req, res) => {
       location: req.body.location || existing?.location || "",
 
       socialLinks: {
-        linkedin:
-          req.body.linkedin || existing?.socialLinks?.linkedin || "",
-        github:
-          req.body.github || existing?.socialLinks?.github || "",
+        // Correctly maps flat frontend fields to the nested model
+        linkedin: req.body.linkedin || req.body.socialLinks?.linkedin || existing?.socialLinks?.linkedin || "",
+        github: req.body.github || req.body.socialLinks?.github || existing?.socialLinks?.github || "",
       },
 
-      profileImage:
-        req.body.profileImage || existing?.profileImage || "",
-      resume:
-        req.body.resume || existing?.resume || "",
+      profileImage: req.body.profileImage || existing?.profileImage || "",
+      resume: req.body.resume || existing?.resume || "",
     };
 
     const about = existing
@@ -50,7 +47,7 @@ exports.createAbout = async (req, res) => {
 exports.deleteAbout = async (req, res) => {
   try {
     await About.deleteMany({});
-    res.json({ message: "About deleted" });
+    res.json({ message: "About section deleted" });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
