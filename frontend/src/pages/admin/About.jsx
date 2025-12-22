@@ -127,7 +127,7 @@ const About = () => {
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
-      <h2 className="text-3xl font-bold mb-6 text-white">About Me</h2>
+      <h2 className="text-3xl font-bold mb-6 text-black">About Me</h2>
 
       <div className="bg-white p-6 rounded shadow">
         <form onSubmit={handleSubmit} className="grid gap-4">
