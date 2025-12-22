@@ -195,15 +195,11 @@ const Blogs = () => {
               blogs.map((blog) => (
                 <tr key={blog._id} className="border-b">
                   <td className="p-2 text-center">
-                    <img
-                      src={
-                        blog.image
-                          ? `http://localhost:5000/uploads/${blog.image}`
-                          : "https://via.placeholder.com/120x80?text=No+Image"
-                      }
-                      alt={blog.title}
-                      className="h-16 w-24 object-cover mx-auto rounded"
-                    />
+                   <img
+                       src={blog.image || "https://via.placeholder.com/120x80?text=No+Image"}
+                       alt={blog.title}
+                       className="h-16 w-24 object-cover mx-auto rounded"
+                   />
                   </td>
                   <td className="p-2 text-center">{blog.title}</td>
                   <td className="p-2 text-center">
