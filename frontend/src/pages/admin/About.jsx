@@ -24,11 +24,9 @@ const About = () => {
   const profileRef = useRef(null);
   const resumeRef = useRef(null);
 
-  // ---------------- FETCH ABOUT ----------------
   const fetchAbout = async () => {
     try {
       const res = await api.getAbout();
-
       if (res?.data) {
         const data = {
           name: res.data.name || "",
@@ -42,11 +40,11 @@ const About = () => {
           profileImage: res.data.profileImage || "",
           resume: res.data.resume || "",
         };
-
+        // Form uses null for file inputs, savedData keeps the URLs
         setForm({ ...data, profileImage: null, resume: null });
         setSavedData(data);
       }
-    } catch {
+    } catch (err) {
       toast.error("Failed to load About data");
     } finally {
       setLoading(false);
@@ -57,7 +55,6 @@ const About = () => {
     fetchAbout();
   }, []);
 
-  // ---------------- HANDLERS ----------------
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((p) => ({ ...p, [name]: value }));
@@ -68,15 +65,26 @@ const About = () => {
     setForm((p) => ({ ...p, [name]: files[0] }));
   };
 
-  // ---------------- SUBMIT ----------------
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
 
     try {
-      const payload = { ...savedData, ...form };
+      // 1. Create payload using text fields from form and existing URLs from savedData
+      const payload = {
+        name: form.name,
+        title: form.title,
+        bio: form.bio,
+        email: form.email,
+        phone: form.phone,
+        location: form.location,
+        linkedin: form.linkedin,
+        github: form.github,
+        profileImage: savedData.profileImage, 
+        resume: savedData.resume,
+      };
 
-      // Upload Profile Image
+      // 2. Upload Profile Image if a new file was selected
       if (form.profileImage instanceof File) {
         const data = new FormData();
         data.append("file", form.profileImage);
@@ -84,7 +92,7 @@ const About = () => {
         payload.profileImage = res.data.url;
       }
 
-      // Upload Resume
+      // 3. Upload Resume if a new file was selected
       if (form.resume instanceof File) {
         const data = new FormData();
         data.append("file", form.resume);
@@ -92,129 +100,127 @@ const About = () => {
         payload.resume = res.data.url;
       }
 
-      const saved = await api.createAbout(payload);
-
-      const synced = {
-        name: saved.data.name,
-        title: saved.data.title,
-        bio: saved.data.bio,
-        email: saved.data.email,
-        phone: saved.data.phone,
-        location: saved.data.location,
-        linkedin: saved.data.socialLinks?.linkedin || "",
-        github: saved.data.socialLinks?.github || "",
-        profileImage: saved.data.profileImage || "",
-        resume: saved.data.resume || "",
-      };
-
-      setSavedData(synced);
-      setForm({ ...synced, profileImage: null, resume: null });
-
-      profileRef.current.value = "";
-      resumeRef.current.value = "";
-
+      // 4. Send the flattened payload to the backend
+      await api.createAbout(payload);
+      
       toast.success("About section updated successfully!");
-    } catch {
+      // Refresh to sync everything from DB
+      fetchAbout();
+
+      if(profileRef.current) profileRef.current.value = "";
+      if(resumeRef.current) resumeRef.current.value = "";
+    } catch (err) {
       toast.error("Update failed");
     } finally {
       setSaving(false);
     }
   };
 
-  // ---------------- CLEAR ----------------
   const handleClear = () => {
     setForm({ ...savedData, profileImage: null, resume: null });
-    profileRef.current.value = "";
-    resumeRef.current.value = "";
+    if(profileRef.current) profileRef.current.value = "";
+    if(resumeRef.current) resumeRef.current.value = "";
     toast.info("Form reset to saved data");
   };
 
-  if (loading) return <p className="p-6">Loading...</p>;
+  if (loading) return <p className="p-6 text-white">Loading...</p>;
 
-  // ---------------- UI ----------------
   return (
     <div className="p-6 max-w-4xl mx-auto">
-      <h2 className="text-3xl font-bold mb-6">About Me</h2>
+      <h2 className="text-3xl font-bold mb-6 text-white">About Me</h2>
 
       <div className="bg-white p-6 rounded shadow">
         <form onSubmit={handleSubmit} className="grid gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {["name", "title", "email", "phone", "location", "linkedin", "github"].map((field) => (
+              <div key={field} className="flex flex-col">
+                <label className="capitalize text-sm font-semibold mb-1">{field}</label>
+                <input
+                  name={field}
+                  value={form[field]}
+                  onChange={handleChange}
+                  placeholder={field.toUpperCase()}
+                  className="border p-2 rounded focus:ring-2 focus:ring-cyan-500 outline-none"
+                />
+              </div>
+            ))}
+          </div>
 
-          {["name","title","email","phone","location","linkedin","github"].map((field) => (
-            <input
-              key={field}
-              name={field}
-              value={form[field]}
+          <div className="flex flex-col">
+            <label className="text-sm font-semibold mb-1">Bio</label>
+            <textarea
+              name="bio"
+              value={form.bio}
               onChange={handleChange}
-              placeholder={field.toUpperCase()}
-              className="border p-2 rounded"
+              rows={4}
+              placeholder="Tell us about yourself..."
+              className="border p-2 rounded focus:ring-2 focus:ring-cyan-500 outline-none"
             />
-          ))}
+          </div>
 
-          <textarea
-            name="bio"
-            value={form.bio}
-            onChange={handleChange}
-            rows={4}
-            placeholder="Bio"
-            className="border p-2 rounded"
-          />
-
-          {/* PROFILE IMAGE */}
-          <div>
-            <label className="font-medium">Profile Image</label>
-            <input
-              ref={profileRef}
-              type="file"
-              name="profileImage"
-              accept="image/*"
-              onChange={handleFileChange}
-            />
-            {savedData.profileImage && (
-              <img
-                src={savedData.profileImage}
-                alt="Profile"
-                className="h-32 w-32 rounded object-cover mt-2"
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 border-t pt-4">
+            <div>
+              <label className="font-bold block mb-2">Profile Image</label>
+              <input
+                ref={profileRef}
+                type="file"
+                name="profileImage"
+                accept="image/*"
+                onChange={handleFileChange}
+                className="mb-2"
               />
-            )}
+              {savedData.profileImage && (
+                <div className="mt-2">
+                  <p className="text-xs text-gray-500 mb-1">Current Image:</p>
+                  <img
+                    src={savedData.profileImage}
+                    alt="Profile"
+                    className="h-32 w-32 rounded object-cover border"
+                  />
+                </div>
+              )}
+            </div>
+
+            <div>
+              <label className="font-bold block mb-2">Resume (PDF)</label>
+              <input
+                ref={resumeRef}
+                type="file"
+                name="resume"
+                accept="application/pdf"
+                onChange={handleFileChange}
+                className="mb-2"
+              />
+              {savedData.resume && (
+                <div className="mt-2">
+                  <p className="text-xs text-gray-500 mb-1">Current File:</p>
+                  <a
+                    href={savedData.resume}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-cyan-600 font-medium hover:underline flex items-center gap-2"
+                  >
+                    View Current Resume
+                  </a>
+                </div>
+              )}
+            </div>
           </div>
 
-          {/* RESUME */}
-          <div>
-            <label className="font-medium">Resume (PDF)</label>
-            <input
-              ref={resumeRef}
-              type="file"
-              name="resume"
-              accept="application/pdf"
-              onChange={handleFileChange}
-            />
-            {savedData.resume && (
-              <a
-                href={savedData.resume}
-                target="_blank"
-                rel="noreferrer"
-                className="text-blue-600 underline block mt-1"
-              >
-                View Resume
-              </a>
-            )}
-          </div>
-
-          <div className="flex gap-4">
+          <div className="flex gap-4 mt-6">
             <button
               type="submit"
               disabled={saving}
-              className="bg-cyan-500 text-white px-4 py-2 rounded hover:bg-cyan-600"
+              className="bg-cyan-500 text-white px-6 py-2 rounded font-bold hover:bg-cyan-600 disabled:bg-gray-400 transition"
             >
-              {saving ? "Saving..." : "Save"}
+              {saving ? "Saving..." : "Save Changes"}
             </button>
-
             <button
               type="button"
               onClick={handleClear}
-              className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+              className="bg-gray-200 text-gray-700 px-6 py-2 rounded font-bold hover:bg-gray-300 transition"
             >
-              Clear
+              Reset Form
             </button>
           </div>
         </form>
